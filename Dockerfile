@@ -4,7 +4,10 @@ FROM node:20-slim
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy the package.json and the package-lock.json files to the container
+# Install system dependencies
+RUN apt-get update -y && apt-get install -y openssl
+
+# Copy the package.json and package-lock.json files to the container
 COPY package*.json ./
 
 # Install the dependencies
@@ -13,13 +16,11 @@ RUN npm install
 # Copy the rest of the application code
 COPY . .
 
-# Install OpenSSL
-RUN apt-get update -y && apt-get install -y openssl
+# Generate Prisma Client
+RUN npx prisma generate
 
-# Expose the port that the app runs on
+# Expose the port the app runs on
 EXPOSE 3000
 
-# Define the command to run your application
+# Start the application
 CMD ["node", "./src/server.js"]
-
-# NOTE: The image size can be optimized by using multi-stage builds to separate development dependencies from production code.
